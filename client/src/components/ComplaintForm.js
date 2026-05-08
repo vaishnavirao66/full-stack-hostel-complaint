@@ -1,8 +1,13 @@
 import React, { useState } from "react";
+
 import axios from "axios";
+
 import { toast } from "react-toastify";
 
-function ComplaintForm() {
+function ComplaintForm({
+  complaints,
+  setComplaints,
+}) {
   const [title, setTitle] =
     useState("");
 
@@ -16,7 +21,7 @@ function ComplaintForm() {
     e.preventDefault();
 
     try {
-      await axios.post(
+      const res = await axios.post(
         "http://localhost:5000/api/complaints",
         {
           title,
@@ -25,6 +30,11 @@ function ComplaintForm() {
         }
       );
 
+      setComplaints([
+        res.data,
+        ...complaints,
+      ]);
+
       toast.success(
         "Complaint Added Successfully"
       );
@@ -32,8 +42,6 @@ function ComplaintForm() {
       setTitle("");
       setDescription("");
       setCategory("Electrical");
-
-      window.location.reload();
     } catch (error) {
       console.log(error);
 

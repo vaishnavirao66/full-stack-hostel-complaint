@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import axios from "axios";
 
 import ComplaintForm from "./components/ComplaintForm";
 import ComplaintList from "./components/ComplaintList";
@@ -12,6 +17,25 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   const [isLoggedIn, setIsLoggedIn] =
     useState(localStorage.getItem("user"));
+
+  const [complaints, setComplaints] =
+    useState([]);
+
+  const fetchComplaints = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/complaints"
+      );
+
+      setComplaints(res.data.reverse());
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
 
   const logout = () => {
     localStorage.clear();
@@ -50,9 +74,15 @@ function App() {
             </p>
           </div>
 
-          <ComplaintForm />
+          <ComplaintForm
+            complaints={complaints}
+            setComplaints={setComplaints}
+          />
 
-          <ComplaintList />
+          <ComplaintList
+            complaints={complaints}
+            setComplaints={setComplaints}
+          />
         </div>
       )}
 

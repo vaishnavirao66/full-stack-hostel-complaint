@@ -1,37 +1,18 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useState } from "react";
 
 import axios from "axios";
 
 import { toast } from "react-toastify";
 
-function ComplaintList() {
-  const [complaints, setComplaints] =
-    useState([]);
-
+function ComplaintList({
+  complaints,
+  setComplaints,
+}) {
   const [search, setSearch] =
     useState("");
 
   const role =
     localStorage.getItem("role");
-
-  const fetchComplaints = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/complaints"
-      );
-
-      setComplaints(res.data.reverse());
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchComplaints();
-  }, []);
 
   const updateStatus = async (id) => {
     try {
@@ -42,11 +23,20 @@ function ComplaintList() {
         }
       );
 
+      setComplaints(
+        complaints.map((item) =>
+          item._id === id
+            ? {
+                ...item,
+                status: "Resolved",
+              }
+            : item
+        )
+      );
+
       toast.success(
         "Complaint Resolved"
       );
-
-      fetchComplaints();
     } catch (error) {
       console.log(error);
     }
@@ -58,11 +48,15 @@ function ComplaintList() {
         `http://localhost:5000/api/complaints/${id}`
       );
 
+      setComplaints(
+        complaints.filter(
+          (item) => item._id !== id
+        )
+      );
+
       toast.error(
         "Complaint Deleted"
       );
-
-      fetchComplaints();
     } catch (error) {
       console.log(error);
     }
@@ -89,7 +83,6 @@ function ComplaintList() {
 
   return (
     <div>
-      {/* ADMIN DASHBOARD */}
       {role === "Admin" && (
         <div className="dashboard">
           <div className="dashboard-card">
@@ -158,17 +151,21 @@ function ComplaintList() {
               {item.status}
             </div>
 
-            {/* ADMIN ONLY */}
             {role === "Admin" && (
               <div className="button-group">
-                <button
-                  className="resolve-btn"
-                  onClick={() =>
-                    updateStatus(item._id)
-                  }
-                >
-                  Mark Resolved
-                </button>
+                {item.status !==
+                  "Resolved" && (
+                  <button
+                    className="resolve-btn"
+                    onClick={() =>
+                      updateStatus(
+                        item._id
+                      )
+                    }
+                  >
+                    Mark Resolved
+                  </button>
+                )}
 
                 <button
                   className="delete-btn"
@@ -188,4 +185,5 @@ function ComplaintList() {
     </div>
   );
 }
+
 export default ComplaintList;
